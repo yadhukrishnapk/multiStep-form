@@ -10,7 +10,7 @@ import useFormDraft from '../../hooks/useFormDraft';
 import usePreventUnload from '../../hooks/usePreventUnload';
 
 // Form State Observer - helps track changes for localStorage
-const FormStateObserver = () => {
+const FormStateObserver = ({ onStateChange }) => {
   const formState = useFormState();
   const { saveNow } = useFormDraft('registration-form-draft');
   
@@ -18,8 +18,10 @@ const FormStateObserver = () => {
     // Save form state whenever it changes
     if (formState.values && Object.keys(formState.values).length > 0) {
       saveNow();
+      // Pass the updated values to parent component
+      onStateChange(formState.values);
     }
-  }, [formState, saveNow]);
+  }, [formState, saveNow, onStateChange]);
   
   return null;
 };
@@ -28,6 +30,7 @@ const FormStateObserver = () => {
 const MultiStepForm = () => {
   const [currentStepName, setCurrentStepName] = useState('info');
   const [initialValues, setInitialValues] = useState({});
+  const [formValues, setFormValues] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const stepNames = ['info', 'contact', 'additional', 'review'];
   const STORAGE_KEY = 'registration-form-draft';
@@ -48,6 +51,9 @@ const MultiStepForm = () => {
           // Remove the _currentStep from the values for form initialization
           const { _currentStep, ...formValues } = parsedDraft;
           setInitialValues(formValues);
+          setFormValues(formValues);
+          console.log('Loaded saved form data:', formValues);
+          
         }
       }
     } catch (error) {
@@ -72,6 +78,10 @@ const MultiStepForm = () => {
         };
       });
     }
+  };
+
+  const handleFormStateChange = (values) => {
+    setFormValues(values);
   };
 
   const handleSubmit = (formState) => {
@@ -101,13 +111,13 @@ const MultiStepForm = () => {
         autoComplete="off" 
         initialValues={initialValues}
       >
-        <FormStateObserver />
+        <FormStateObserver onStateChange={handleFormStateChange} />
         <Multistep current={currentStepName} onChange={handleStepChange}>
           <StepIndicator />
           <Info />
           <Contact />
           <Additional />
-          <Review />
+          <Review formData={formValues} />
         </Multistep>
         <div className="button-group">
           <button type="button" onClick={clearDraft} className="clear-btn">
