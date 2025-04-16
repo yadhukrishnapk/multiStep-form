@@ -3,7 +3,9 @@ import MultiStepForm from '../../components/form/MultiStepForm'
 
 const Page = () => {
   return (
-    <div>
+    <div className="page-container">
+      <div className="page-header-main">
+        </div>
         <MultiStepForm/>
     </div>
   )
