@@ -1,12 +1,17 @@
-import React from 'react'
-import Page from './assets/pages/Page'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Page from './assets/pages/Page';
+import ThankYou from './assets/pages/ThankYou';
 
 const App = () => {
   return (
-    <div>
-      <Page/>
-    </div>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Page />} />
+        <Route path="/thank-you" element={<ThankYou />} />
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
