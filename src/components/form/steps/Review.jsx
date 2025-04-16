@@ -6,13 +6,12 @@ import useFormDraft from '../../../hooks/useFormDraft';
 const Review = ({ formData }) => {
   const { previous } = useMultistepApi();
   const { values } = useFormState();
-  const { saveNow } = useFormDraft('registration-form-draft');
+  const { saveNow, clearDraft } = useFormDraft('registration-form-draft');
   
   // Use either passed formData or values from useFormState
   const formValues = formData || values || {};
   console.log('Form Values in Review:', formValues);
   
-
   const handlePrevious = () => {
     // Save when going to previous step with the updated step
     saveNow((currentValues) => {
@@ -22,6 +21,12 @@ const Review = ({ formData }) => {
       };
     });
     previous();
+  };
+
+  const handleSubmit = (e) => {
+    // The form submission is handled by the parent component
+    // But we can add additional functionality here if needed
+    // Note: Don't call e.preventDefault() as we want the form to submit
   };
 
   return (
@@ -72,7 +77,7 @@ const Review = ({ formData }) => {
           <button type="button" onClick={handlePrevious} className="prev-btn">
             <span className="btn-icon">←</span> Previous
           </button>
-          <button type="submit" className="submit-btn">
+          <button type="submit" onClick={handleSubmit} className="submit-btn">
             Submit <span className="btn-icon">✓</span>
           </button>
         </div>

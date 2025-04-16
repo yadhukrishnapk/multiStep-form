@@ -32,12 +32,19 @@ const MultiStepForm = () => {
   const [initialValues, setInitialValues] = useState({});
   const [formValues, setFormValues] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const stepNames = ['info', 'contact', 'additional', 'review'];
   const STORAGE_KEY = 'registration-form-draft';
   const { isDraftSaved, saveNow, clearDraft } = useFormDraft(STORAGE_KEY);
   
   // Try to load the saved data from localStorage on initial render
   useEffect(() => {
+    if (isSubmitted) {
+      // If form is submitted, don't load data from localStorage
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const savedDraft = localStorage.getItem(STORAGE_KEY);
       if (savedDraft) {
@@ -53,7 +60,6 @@ const MultiStepForm = () => {
           setInitialValues(formValues);
           setFormValues(formValues);
           console.log('Loaded saved form data:', formValues);
-          
         }
       }
     } catch (error) {
@@ -61,10 +67,10 @@ const MultiStepForm = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isSubmitted]);
   
-  // Add the unload prevention hook
-  usePreventUnload(STORAGE_KEY);
+  // Add the unload prevention hook - but disable it after submission
+  usePreventUnload(isSubmitted ? null : STORAGE_KEY);
 
   const handleStepChange = (step) => {
     if (stepNames.includes(step)) {
@@ -86,10 +92,30 @@ const MultiStepForm = () => {
 
   const handleSubmit = (formState) => {
     console.log('Form submitted with values:', formState.values);
-    alert('Form submitted successfully!\n' + JSON.stringify(formState.values, null, 2));
     
     // Clear the draft from localStorage after successful submission
     clearDraft();
+    
+    // Reset the form state
+    setIsSubmitted(true);
+    setInitialValues({});
+    setFormValues({});
+    setCurrentStepName('info');
+    
+    alert('Form submitted successfully!\n' + JSON.stringify(formState.values, null, 2));
+    
+    // If you want to redirect after submission, you can do it here
+    // For example: window.location.href = '/thank-you';
+  };
+
+  const handleClearDraft = () => {
+    clearDraft();
+    setInitialValues({});
+    setFormValues({});
+    setCurrentStepName('info');
+    
+    // Force reload the page to ensure all form states are reset
+    window.location.reload();
   };
 
   if (isLoading) {
@@ -110,6 +136,7 @@ const MultiStepForm = () => {
         onSubmit={handleSubmit} 
         autoComplete="off" 
         initialValues={initialValues}
+        key={isSubmitted ? 'submitted-form' : 'draft-form'} // Force re-render after submission
       >
         <FormStateObserver onStateChange={handleFormStateChange} />
         <Multistep current={currentStepName} onChange={handleStepChange}>
@@ -120,7 +147,7 @@ const MultiStepForm = () => {
           <Review formData={formValues} />
         </Multistep>
         <div className="button-group">
-          <button type="button" onClick={clearDraft} className="clear-btn">
+          <button type="button" onClick={handleClearDraft} className="clear-btn">
             Clear Draft
           </button>
         </div>
