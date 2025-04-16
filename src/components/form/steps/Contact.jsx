@@ -2,6 +2,7 @@ import React from 'react';
 import { Multistep, useMultistepApi } from 'informed';
 import InputField from '../../input/InputField';
 import { Mail, Phone } from 'lucide-react';
+import useFormDraft from '../../../hooks/useFormDraft';
 
 // Validation Functions
 const validateEmail = (value) => {
@@ -21,6 +22,29 @@ const validatePhone = (value) => {
 // Step 2: Contact Information
 const Contact = () => {
   const { next, previous } = useMultistepApi();
+  const { saveNow } = useFormDraft('registration-form-draft');
+  
+  const handleNext = () => {
+    // Save the draft immediately before navigating with the next step
+    saveNow((currentValues) => {
+      return {
+        ...currentValues,
+        _currentStep: 'additional'
+      };
+    });
+    next();
+  };
+
+  const handlePrevious = () => {
+    // Save when going to previous step with the updated step
+    saveNow((currentValues) => {
+      return {
+        ...currentValues,
+        _currentStep: 'info'
+      };
+    });
+    previous();
+  };
   
   return (
     <Multistep.Step step="contact">
@@ -49,10 +73,10 @@ const Contact = () => {
           icon={<Phone size={18} />}
         />
         <div className="button-group">
-          <button type="button" onClick={previous} className="prev-btn">
+          <button type="button" onClick={handlePrevious} className="prev-btn">
             <span className="btn-icon">←</span> Previous
           </button>
-          <button type="button" onClick={next} className="next-btn">
+          <button type="button" onClick={handleNext} className="next-btn">
             Next <span className="btn-icon">→</span>
           </button>
         </div>

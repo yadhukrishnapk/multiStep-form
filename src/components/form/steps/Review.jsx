@@ -1,11 +1,24 @@
 import React from 'react';
 import { Multistep, useMultistepApi, useFormApi } from 'informed';
+import useFormDraft from '../../../hooks/useFormDraft';
 
 // Step 4: Review
 const Review = () => {
   const { previous } = useMultistepApi();
   const { formState } = useFormApi();
+  const { saveNow } = useFormDraft('registration-form-draft');
   const values = formState?.values || {};
+
+  const handlePrevious = () => {
+    // Save when going to previous step with the updated step
+    saveNow((currentValues) => {
+      return {
+        ...currentValues,
+        _currentStep: 'additional'
+      };
+    });
+    previous();
+  };
 
   return (
     <Multistep.Step step="review">
@@ -52,7 +65,7 @@ const Review = () => {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={previous} className="prev-btn">
+          <button type="button" onClick={handlePrevious} className="prev-btn">
             <span className="btn-icon">←</span> Previous
           </button>
           <button type="submit" className="submit-btn">

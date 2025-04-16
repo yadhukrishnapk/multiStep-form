@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useField } from 'informed';
 import { AlertCircle } from 'lucide-react';
 
@@ -27,6 +27,16 @@ const InputField = ({
 
   const actualFieldType = fieldType === 'password' ? (showPassword ? 'text' : 'password') : fieldType;
 
+  // This handles persisting individual field values on changes
+  // (although the main form handling is done in useFormDraft)
+  useEffect(() => {
+    // If there's a value and it changes, update the form state
+    if (value !== undefined && value !== null) {
+      // We don't need to do anything special here as the main useFormDraft
+      // hook is already handling the localStorage updates
+    }
+  }, [value, name]);
+
   return render(
     <div className="mb-3">
       {label && (
@@ -35,16 +45,14 @@ const InputField = ({
         </label>
       )}
       <div className={`input-group ${isFocused ? 'focused' : ''}`}>
-        {icon && (
-          <div className="input-icon">
-            {icon}
-          </div>
-        )}
+        {icon && <div className="input-icon">{icon}</div>}
         <input
           id={inputId}
           type={actualFieldType}
           value={value || ''}
-          onChange={(e) => fieldApi.setValue(e.target.value)}
+          onChange={(e) => {
+            fieldApi.setValue(e.target.value);
+          }}
           onBlur={() => {
             fieldApi.setTouched(true);
             setIsFocused(false);
@@ -63,7 +71,7 @@ const InputField = ({
             onClick={() => setShowPassword(!showPassword)}
             className="password-toggle"
           >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showPassword ? 'Hide' : 'Show'}
           </button>
         )}
       </div>

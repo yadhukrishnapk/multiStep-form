@@ -2,6 +2,7 @@ import React from 'react';
 import { Multistep, useMultistepApi } from 'informed';
 import InputField from '../../input/InputField';
 import { User } from 'lucide-react';
+import useFormDraft from '../../../hooks/useFormDraft';
 
 // Validation Function
 const validateRequiredLength = (value) => {
@@ -13,6 +14,18 @@ const validateRequiredLength = (value) => {
 // Step 1: Personal Information
 const Info = () => {
   const { next } = useMultistepApi();
+  const { saveNow } = useFormDraft('registration-form-draft');
+  
+  const handleNext = () => {
+    // Save the draft immediately before navigating with the next step
+    saveNow((currentValues) => {
+      return {
+        ...currentValues,
+        _currentStep: 'contact'
+      };
+    });
+    next();
+  };
   
   return (
     <Multistep.Step step="info">
@@ -39,7 +52,7 @@ const Info = () => {
           icon={<User size={18} />}
         />
         <div className="button-group">
-          <button type="button" onClick={next} className="next-btn">
+          <button type="button" onClick={handleNext} className="next-btn">
             Next <span className="btn-icon">→</span>
           </button>
         </div>
